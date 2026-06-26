@@ -1,4 +1,3 @@
-
 using Microsoft.EntityFrameworkCore;
 using MusicApi.Data;
 
@@ -10,43 +9,42 @@ namespace MusicApi
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // Register Controllers
+            builder.Services.AddControllers();
 
-            //  builder.Services.AddControllers();
-            //builder.Services.AddDbContext<MusicDbContext>(op => op.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            // PostgreSQL
             builder.Services.AddDbContext<MusicDbContext>(options =>
-            options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+                options.UseNpgsql(
+                    builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            // Swagger
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-
+            // CORS
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowReact",
-                    policy =>
-                    {
-                        policy.WithOrigins("http://localhost:3000")
-                              .AllowAnyMethod()
-                              .AllowAnyHeader();
-                    });
+                options.AddPolicy("AllowReact", policy =>
+                {
+                    policy.WithOrigins("http://localhost:3000")
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
+                });
             });
-
 
             var app = builder.Build();
 
             app.UseCors("AllowReact");
-            // Configure the HTTP request pipeline.
-            //if (app.Environment.IsDevelopment())
-            //{
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            //}
+
+            // Swagger
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
             app.UseHttpsRedirection();
 
-            //app.UseAuthorization();
-
+            // Uncomment these only if you add authentication later
+            // app.UseAuthentication();
+            // app.UseAuthorization();
 
             app.MapControllers();
 
