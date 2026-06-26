@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using MusicApi.Data;
 using MusicApi.Models;
 using System.Net.WebSockets;
+using MusicApi.DTOs;
 
 namespace MusicApi.Controllers
 {
@@ -21,16 +22,22 @@ namespace MusicApi.Controllers
             var song= await MusicDbContext.Songs.ToListAsync();
             return Ok(song);
         }
+        // POST: api/Songs
         [HttpPost]
-        public async Task<IActionResult> AddSong(Songs songs)
+        public async Task<IActionResult> AddSong(CreateSongDto createSongDto)
         {
-          //  var song = await MusicDbContext.Songs.FirstAsy();
-            //if (song != null)
-            //{
-                MusicDbContext.Songs.Add(songs);
-                MusicDbContext.SaveChanges();
-         //   }
-            return Ok(songs);
+            var song = new Songs
+            {
+                Title = createSongDto.Title,
+                Artist = createSongDto.Artist,
+                Album = createSongDto.Album,
+                Url = createSongDto.Url
+            };
+
+            await MusicDbContext.Songs.AddAsync(song);
+            await MusicDbContext.SaveChangesAsync();
+
+            return Ok(song);
         }
         [HttpDelete]
         public async Task<IActionResult> DeleteSong(int id)
@@ -46,22 +53,21 @@ namespace MusicApi.Controllers
 
 
         }
-        [HttpPut("id")]
-        public async Task<IActionResult> UpdateSong(int id,[FromBody] Songs songs)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateSong(int id, UpdateSongDto updateSongDto)
         {
-            if (id != songs.Id)
-                return BadRequest();
             var existingSong = await MusicDbContext.Songs.FindAsync(id);
-            if(existingSong == null)
-            {
-                return BadRequest();
-            }
-            existingSong.Title = songs.Title;
-            existingSong.Artist = songs.Artist;
-            existingSong.Album = songs.Album;
-            existingSong.Url = songs.Url;
-           
-            MusicDbContext.SaveChanges();
+
+            if (existingSong == null)
+                return NotFound();
+
+            existingSong.Title = updateSongDto.Title;
+            existingSong.Artist = updateSongDto.Artist;
+            existingSong.Album = updateSongDto.Album;
+            existingSong.Url = updateSongDto.Url;
+
+            await MusicDbContext.SaveChangesAsync();
+
             return NoContent();
         }
     }
