@@ -47,7 +47,7 @@ namespace MusicApi.Controllers
             {
                 NotFound();
             }
-            var song=MusicDbContext.Songs.Remove(result);
+            MusicDbContext.Songs.Remove(result);
             MusicDbContext.SaveChanges();
             return Ok();
 
